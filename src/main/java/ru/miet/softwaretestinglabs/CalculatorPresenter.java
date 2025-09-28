@@ -4,20 +4,20 @@ public interface CalculatorPresenter {
     /**
      * Вызывается формой в тот момент, когда пользователь нажал на кнопку '+'
      */
-    void onPlusClicked(String req);
+    void onPlusClicked();
 
     /**
      * Вызывается формой в тот момент, когда пользователь нажал на кнопку '-'
      */
-    void onMinusClicked(String req);
+    void onMinusClicked();
 
     /**
      * Вызывается формой в тот момент, когда пользователь нажал на кнопку '/'
      */
-    void onDivideClicked(String req);
+    void onDivideClicked();
 
     /**
      * Вызывается формой в тот момент, когда пользователь нажал на кнопку '*'
      */
-    void onMultiplyClicked(String req);
+    void onMultiplyClicked();
 }

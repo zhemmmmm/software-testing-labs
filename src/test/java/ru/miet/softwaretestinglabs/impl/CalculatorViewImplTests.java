@@ -1,69 +1,114 @@
 package ru.miet.softwaretestinglabs.impl;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import javax.swing.*;
+import java.awt.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class CalculatorViewImplTests {
 
-    private final CalculatorViewImpl view = new CalculatorViewImpl();
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
+    private CalculatorViewImpl view;
 
-    @Test
-    void printResult_ShouldOutputToSystemOut() {
-        // given
-        System.setOut(new PrintStream(outContent));
-        double result = 5.5;
-
-        // when
-        view.printResult(result);
-
-        // then
-        assertEquals("5.5" + System.lineSeparator(), outContent.toString());
-        System.setOut(System.out);
+    @BeforeEach
+    void setUp() {
+        view = new CalculatorViewImpl();
     }
 
     @Test
-    void displayError_ShouldOutputToSystemErr() {
-        // given
-        System.setErr(new PrintStream(errContent));
-        String message = "Test error";
+    void testWindowProperties() {
+        assertEquals("Calculator", view.getTitle());
+        assertEquals(JFrame.EXIT_ON_CLOSE, view.getDefaultCloseOperation());
+        assertInstanceOf(GridLayout.class, view.getContentPane().getLayout());
 
-        // when
-        view.displayError(message);
-
-        // then
-        assertEquals("Test error" + System.lineSeparator(), errContent.toString());
-        System.setErr(System.err);
+        GridLayout layout = (GridLayout) view.getContentPane().getLayout();
+        assertEquals(5, layout.getRows());
+        assertEquals(2, layout.getColumns());
     }
 
-    @ParameterizedTest
-    @CsvSource({"5 3, 5", "10.5 2.2, 10.5", "-5 3, -5"})
-    void getFirstArgumentAsString_ShouldReturnFirstPart(String input, String expected) {
-        // given
-
-        // when
-        String result = view.getFirstArgumentAsString(input);
-
-        // then
-        assertEquals(expected, result);
+    @Test
+    void testAllComponentsExist() {
+        // Проверяем, что все компоненты созданы
+        assertNotNull(getField(view, "firstArgumentField"));
+        assertNotNull(getField(view, "secondArgumentField"));
+        assertNotNull(getField(view, "resultField"));
+        assertNotNull(getField(view, "plusButton"));
+        assertNotNull(getField(view, "minusButton"));
+        assertNotNull(getField(view, "multiplyButton"));
+        assertNotNull(getField(view, "divideButton"));
     }
 
-    @ParameterizedTest
-    @CsvSource({"5 3, 3", "10.5 2.2, 2.2", "-5 3, 3"})
-    void getSecondArgumentAsString_ShouldReturnSecondPart(String input, String expected) {
-        // given
+    @Test
+    void testResultFieldIsNotEditable() {
+        JTextField resultField = (JTextField) getField(view, "resultField");
+        assertFalse(resultField.isEditable());
+    }
 
-        // when
-        String result = view.getSecondArgumentAsString(input);
+    @Test
+    void testButtonTexts() {
+        assertEquals("+", ((JButton) getField(view, "plusButton")).getText());
+        assertEquals("-", ((JButton) getField(view, "minusButton")).getText());
+        assertEquals("*", ((JButton) getField(view, "multiplyButton")).getText());
+        assertEquals("/", ((JButton) getField(view, "divideButton")).getText());
+    }
 
-        // then
-        assertEquals(expected, result);
+    @Test
+    void testGetFirstArgumentAsString() {
+        JTextField firstField = (JTextField) getField(view, "firstArgumentField");
+        firstField.setText("123.45");
+
+        assertEquals("123.45", view.getFirstArgumentAsString());
+    }
+
+    @Test
+    void testGetSecondArgumentAsString() {
+        JTextField secondField = (JTextField) getField(view, "secondArgumentField");
+        secondField.setText("67.89");
+
+        assertEquals("67.89", view.getSecondArgumentAsString());
+    }
+
+    @Test
+    void testPrintResult() {
+        JTextField resultField = (JTextField) getField(view, "resultField");
+
+        view.printResult(123.456);
+        assertEquals("123.456", resultField.getText());
+
+        view.printResult(-78.9);
+        assertEquals("-78.9", resultField.getText());
+    }
+
+    @Test
+    void testSetActionListener() {
+        java.awt.event.ActionListener listener = mock(java.awt.event.ActionListener.class);
+
+        view.setActionListener(listener);
+
+        JButton plusButton = (JButton) getField(view, "plusButton");
+        JButton minusButton = (JButton) getField(view, "minusButton");
+        JButton multiplyButton = (JButton) getField(view, "multiplyButton");
+        JButton divideButton = (JButton) getField(view, "divideButton");
+
+        assertEquals(1, plusButton.getActionListeners().length);
+        assertEquals(1, minusButton.getActionListeners().length);
+        assertEquals(1, multiplyButton.getActionListeners().length);
+        assertEquals(1, divideButton.getActionListeners().length);
+    }
+
+    private Object getField(Object object, String fieldName) {
+        try {
+            var field = object.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field.get(object);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка при получении поля: " + fieldName, e);
+        }
     }
 }

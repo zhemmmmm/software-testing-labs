@@ -15,10 +15,10 @@ public interface CalculatorView {
     /**
      * Возвращает значение, введенное в поле первого аргументы
      */
-    String getFirstArgumentAsString(String req);
+    String getFirstArgumentAsString();
 
     /**
      * Возвращает значение, введенное в поле второго аргументы
      */
-    String getSecondArgumentAsString(String req);
+    String getSecondArgumentAsString();
 }
